@@ -5,6 +5,10 @@ __pycache__/
 
 # C extensions
 *.so
+ 
+# Obviar archivos pesados csv y pickle
+*.csv
+*.pkl
 
 # Distribution / packaging
 .Python
