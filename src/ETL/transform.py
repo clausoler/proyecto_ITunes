@@ -1,3 +1,8 @@
+import pandas as pd
+from pathlib import Path
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
 import re
 import unicodedata
 
@@ -6,7 +11,7 @@ def limpieza_total_texto_final(df):
     Limpia exhaustivamente todas las columnas de tipo texto (object) en un DataFrame para depurar datos contaminados
     provenientes de fuentes como APIs. Esta limpieza está especialmente diseñada para contenido musical (iTunes, etc.).
 
-    ✔️ Operaciones que realiza:
+    Operaciones que realiza:
     ---------------------------
     - Elimina cadenas con errores comunes como:
         '#¿NOMBRE?', '#¡VALOR!', '¿?', etc. que podrían provenir de errores de importación o codificación.
@@ -20,7 +25,7 @@ def limpieza_total_texto_final(df):
     - Limpia espacios extra y caracteres no deseados con expresiones regulares.
     - Elimina filas donde todas las columnas de texto hayan quedado vacías tras la limpieza.
 
-    ❗ NOTA:
+     NOTA:
     -------
     - Esta función **no convierte a minúsculas**: respeta las mayúsculas originales.
     - Todos los filtros se aplican aún si los datos están en formato `object` (string no tipado).
@@ -71,7 +76,10 @@ def limpieza_total_texto_final(df):
     df = df[~mask]
 
     return df
- 
+
+
+
+# Función para eliminar hora, minutos y segundos usando .str.split() y convertir a datetime
 def limpiar_fechas_split(df):
     """
     Elimina la parte de hora, minutos y segundos de las columnas 'checked_at' y 'releaseDate'
@@ -90,7 +98,9 @@ def limpiar_fechas_split(df):
     df["checked_at"] = pd.to_datetime(df["checked_at"].astype(str).str.split("T").str[0], errors="coerce")
     df["releaseDate"] = pd.to_datetime(df["releaseDate"].astype(str).str.split("T").str[0], errors="coerce")
     return df
- 
+
+
+
 def convertir_columnas_a_entero(df, columnas):
     """
     Convierte columnas numéricas a tipo entero truncando los decimales,
@@ -121,7 +131,9 @@ def convertir_columnas_a_entero(df, columnas):
         df[col] = df[col].apply(lambda x: int(x) if pd.notna(x) else pd.NA)
         df[col] = df[col].astype("Int64")
     return df
- 
+
+
+
 def convertir_a_booleano(df, columna):
     """
     Convierte una columna del DataFrame a tipo booleano (`True`, `False`, `<NA>`),
@@ -156,7 +168,9 @@ def convertir_a_booleano(df, columna):
     # Forzar tipo boolean con soporte para nulos
     df[columna] = df[columna].astype("boolean")
     return df
- 
+
+
+
 def reporte_nulos(df):
     """
     Genera un reporte sobre los valores nulos de un DataFrame.
@@ -184,7 +198,8 @@ def reporte_nulos(df):
     df_reporte["porcentaje_nulos"] = round((df.isnull().sum() / len(df)) * 100, 2)
     df_reporte["tipo_variables"] = df.dtypes
     return df_reporte
- 
+
+
 def eliminar_filas_nulas(df, columnas_obligatorias):
     """
     Elimina filas del DataFrame que tengan valores nulos en columnas clave.
@@ -204,6 +219,8 @@ def eliminar_filas_nulas(df, columnas_obligatorias):
     """
     return df.dropna(subset=columnas_obligatorias)
  
+
+
 def rellenar_nulos_texto(df, columnas):
     """
     Rellena valores nulos en columnas de tipo texto (object) con 'Sin identificar'.
@@ -229,7 +246,9 @@ def rellenar_nulos_texto(df, columnas):
     for col in columnas:
         df.loc[:, col] = df[col].astype("object").fillna("Sin identificar")
     return df
- 
+
+
+
 def limpiar_columnas_precio(df):
     """
     Limpia y normaliza las columnas 'trackPrice' y 'collectionPrice':
@@ -257,11 +276,13 @@ def limpiar_columnas_precio(df):
         media = df[col].dropna().mean()
         df.loc[:, col] = df[col].fillna(media).round(2)
 
-    print("\n📊 Estadísticas descriptivas de precios:")
+    print("\n[GRAFICO] Estadísticas descriptivas de precios:")
     print(df[columnas_precio].describe())
 
     return df
- 
+
+
+
 def asignar_id_incremental(df, columna, inicio=1):
     """
     Reemplaza completamente una columna con un ID incremental único.
@@ -287,7 +308,8 @@ def asignar_id_incremental(df, columna, inicio=1):
     """
     df.loc[:, columna] = pd.Series(range(inicio, inicio + len(df)), index=df.index, dtype="Int64")
     return df
- 
+
+
 def procesar_dataframe_maestro(ruta_pickle):
     """
     Carga un DataFrame maestro desde un archivo pickle, lo limpia y separa en tablas normalizadas:
@@ -322,7 +344,6 @@ def procesar_dataframe_maestro(ruta_pickle):
         "trackCount": "trackcount",
         "discCount": "disccount",
         "collectionViewUrl": "collectionviewurl",
-        "collectionArtistId": "collectionartist_id",
         "collectionArtistName": "collectionartistname",
         "collectionArtistViewUrl": "collectionartistviewurl",
         "trackId": "track_id",
@@ -348,7 +369,7 @@ def procesar_dataframe_maestro(ruta_pickle):
     album_cols = [
         "collection_id", "collectionname", "collectioncensoredname", "release_date",
         "collectionexplicitness", "contentadvisoryrating", "collectionprice", "currency",
-        "trackcount", "disccount", "collectionviewurl", "collectionartist_id",
+        "trackcount", "disccount", "collectionviewurl",
         "collectionartistname", "collectionartistviewurl", "artist_id"
     ]
     album_df = df[album_cols].drop_duplicates(subset=["collection_id"]).copy()
@@ -361,13 +382,13 @@ def procesar_dataframe_maestro(ruta_pickle):
     track_df = df[track_cols].drop_duplicates(subset=["track_id"]).copy()
 
     genre_df = (
-        df[["primarygenrename"]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .reset_index()
-        .rename(columns={"index": "genre_id"})
+    df[["primarygenrename"]]
+    .drop_duplicates()
+    .rename(columns={"primaryGenreName": "primarygenrename"})
+    .reset_index(drop=True) 
     )
-    track_df = track_df.merge(genre_df, on="primarygenrename", how="left").drop(columns="primarygenrename")
+    
+    track_df = track_df.merge(genre_df, on="primarygenrename", how="left")
 
     track_prices_df = (
         df[["track_id", "trackprice", "checked_at"]]
@@ -389,4 +410,4 @@ def procesar_dataframe_maestro(ruta_pickle):
         "track_prices": track_prices_df,
         "album_prices": album_prices_df
     }
- 
+

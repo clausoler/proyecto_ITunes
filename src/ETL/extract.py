@@ -11,7 +11,7 @@ def configurar_extraccion():
     API_URL = os.getenv("ITUNES_API_URL")
 
     CARPETA_DATOS = "../data/data_raw"
-    LOG_TERMS = "terminos_usados.txt"
+    LOG_TERMS = "notebooks/terminos_usados.txt"
     os.makedirs(CARPETA_DATOS, exist_ok=True)
 
     TERMINOS = [''.join(p) for p in product('abcdefghijklmnopqrstuvwxyz', repeat=2)]
@@ -52,28 +52,30 @@ def buscar_itunes(term, api_url, limit=200):
                 df["checked_at"] = datetime.now(UTC).date()
                 return df
     except Exception as e:
-        print(f"❌ Error con '{term}': {e}")
+        print(f"[ERROR] Error con '{term}': {e}")
     return pd.DataFrame()
 
 def ejecutar_scrape_diario(config):
+    print("[DEBUG] Entrando a ejecutar_scrape_diario()")
     usados = cargar_terminos_usados(config["LOG_TERMS"])
     pendientes = [t for t in config["TERMINOS"] if t not in usados][:config["TERMINOS_POR_DIA"]]
 
     if not pendientes:
-        print("✅ Todos los términos han sido usados.")
+        print("[COMPLETADO] Todos los términos han sido usados.")
         return
 
     dfs = []
 
     for termino in pendientes:
-        print(f"🔍 Buscando: '{termino}'")
+        print(f"[DEBUG] Término: {termino}")
+        print(f"[BUSCANDO] Buscando: '{termino}'")
         df = buscar_itunes(termino, config["API_URL"])
         if not df.empty:
             dfs.append(df)
             guardar_termino_usado(termino, config["LOG_TERMS"])
-            print(f"✅ {len(df)} resultados para '{termino}'")
+            print(f"[COMPLETADO] {len(df)} resultados para '{termino}'")
         else:
-            print(f"⚠️ Sin resultados para '{termino}'")
+            print(f"[ADVERTENCIA] Sin resultados para '{termino}'")
         time.sleep(1)
 
     if dfs:
@@ -81,4 +83,4 @@ def ejecutar_scrape_diario(config):
         hoy = datetime.now().strftime("%Y-%m-%d")
         archivo_salida = f"{config['CARPETA_DATOS']}/itunes_{hoy}.csv"
         df_total.to_csv(archivo_salida, index=False)
-        print(f"📦 Guardados {len(df_total)} registros en '{archivo_salida}'")
+        print(f"[GUARDADO] {len(df_total)} registros en '{archivo_salida}'")
