@@ -38,3 +38,9 @@
 | `collectionArtistViewUrl`  | URL del artista de la colección |
 | `contentAdvisoryRating`    | Clasificación de contenido (`Explicit`, `Clean`, etc.) |
 | `checked_at`               | Fecha de extracción del dato (fecha del scraping) |
+
+## cleaned suele aplicarse a álbumes de hip-hop o pop que tienen una versión "radio edit" o familiar.
+
+## explicit indica que el contenido no ha sido modificado y puede tener lenguaje fuerte.
+
+## notExplicit representa álbumes que nunca incluyeron contenido sensible.
