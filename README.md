@@ -106,7 +106,7 @@ python main_EDA.py
 
 ### 📈 5. Visualización con Power BI
 
-1. Abre el archivo `dashboard_ITunes.pbix` que se encuentra en la carpeta `Entregables/`.
+1. Abre el archivo `dashboard_ITunes.pbix`.
 2. Power BI se conectará directamente a tu instancia local de PostgreSQL.
 3. Si es necesario, actualiza las credenciales o el nombre de servidor/base de datos en las **fuentes de datos**.
 
