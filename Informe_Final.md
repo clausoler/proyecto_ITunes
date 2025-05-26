@@ -158,6 +158,7 @@ Los hallazgos clave fueron:
 - **Evolución temporal:** Los precios se mantienen estables, lo cual permite detectar con facilidad futuras promociones.
 - **Distribución por género:** Hip-Hop/Rap y Pop dominan el catálogo; géneros instrumentales tienden a tener canciones más largas pero no más caras.
 
+
 ---
 
 ## 5. 📈 Impacto de Negocio y Recomendaciones
